@@ -114,6 +114,12 @@ async function run() {
  
     app.post("/join", async (req, res) => {
       const { eventId, userEmail } = req.body;
+
+            if (!eventId || !userEmail || !ObjectId.isValid(eventId)) {
+        return res.status(400).send({ message: "Valid eventId and userEmail are required" });
+      } 
+
+      
       const exists = await joined.findOne({ eventId, userEmail });
       if (exists) return res.status(409).send({ message: "Already joined" });
       const event = await events.findOne({ _id: new ObjectId(eventId) });
