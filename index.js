@@ -119,7 +119,7 @@ async function run() {
         return res.status(400).send({ message: "Valid eventId and userEmail are required" });
       } 
 
-      
+
       const exists = await joined.findOne({ eventId, userEmail });
       if (exists) return res.status(409).send({ message: "Already joined" });
       const event = await events.findOne({ _id: new ObjectId(eventId) });
@@ -153,7 +153,8 @@ async function run() {
 run();
 
 app.get("/", (req, res) => {
-  res.send("EventHub server is running");
+
+    res.send("EventHub server is running. Try GET /events");
 });
 
 app.listen(port, () => {
