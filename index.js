@@ -63,7 +63,9 @@ async function run() {
 
 
     app.get("/events", async (req, res) => {
-      const limit = parseInt(req.query.limit) || 0;
+
+            const limit = Math.min(parseInt(req.query.limit) || 0, 50);
+     
       const list = await events
         .find({ eventDate: { $gte: today() } })
         .sort({ eventDate: 1 })
@@ -154,7 +156,7 @@ run();
 
 app.get("/", (req, res) => {
 
-    res.send("EventHub server is running. Try GET /events");
+    res.send("EventHub server is running. Try GET /events");  
 });
 
 app.listen(port, () => {
