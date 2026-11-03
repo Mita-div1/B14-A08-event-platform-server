@@ -4,6 +4,19 @@ const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 const app = express();
+
+const jwt = require("jsonwebtoken");
+function verifyToken(req, res, next) {
+  const auth = req.headers.authorization || "";
+  const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
+  if (!token) return res.status(401).send({ message: "Unauthorized" });
+  try {
+    req.user = jwt.verify(token, process.env.JWT_SECRET); 
+    next();
+  } catch {
+    res.status(401).send({ message: "Invalid or expired token" });
+  }
+}
 const port = process.env.PORT || 5000;
 
 app.use(cors());
@@ -30,12 +43,20 @@ async function run() {
   
     app.post("/events", async (req, res) => {
       const event = req.body;
-      if (!event.title || !event.eventDate || !event.creatorEmail) {
+
+            if (!event.title || !event.eventDate || !event.creatorEmail) {
         return res.status(400).send({ message: "Missing required fields" });
+      }
+      if (event.title.trim().length < 5) {
+        return res.status(400).send({ message: "Title must be at least 5 characters" });
+      }
+      if (!event.description || event.description.trim().length < 20) {
+        return res.status(400).send({ message: "Description must be at least 20 characters" });
       }
       if (event.eventDate < today()) {
         return res.status(400).send({ message: "Date must be in the future" });
       }
+    
       const result = await events.insertOne({ ...event, createdAt: new Date() });
       res.send(result);
     });
